@@ -1,0 +1,13 @@
+<!-- Mint Deck mark: an arc, for the Arc chain, in the site's accent mint.
+     Deliberately a geometric arc rather than a copy of Circle's Arc logo —
+     that mark is their trademark, not ours to ship as our own favicon. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="7.5" fill="#0B0D0E"/>
+  <path
+    d="M6 21.75 A 10 10 0 0 1 26 21.75"
+    fill="none"
+    stroke="#3FD995"
+    stroke-width="4.5"
+    stroke-linecap="round"
+  />
+</svg>
