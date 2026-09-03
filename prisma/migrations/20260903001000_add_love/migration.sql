@@ -1,6 +1,0 @@
--- CreateTable
-CREATE TABLE "Love" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
