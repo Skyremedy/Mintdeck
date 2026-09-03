@@ -12,7 +12,9 @@
     "db:reset": "prisma migrate reset --force",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:baseline": "prisma migrate reset --force --skip-seed"
+    "db:baseline": "prisma migrate reset --force --skip-seed",
+    "db:export": "tsx scripts/db-export.ts",
+    "db:import": "tsx scripts/db-import.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

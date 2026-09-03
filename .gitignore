@@ -43,3 +43,6 @@ next-env.d.ts
 # local sqlite database (schema lives in prisma/migrations)
 /prisma/*.db
 /prisma/*.db-journal
+
+# database snapshots (may contain visitor data)
+/backups

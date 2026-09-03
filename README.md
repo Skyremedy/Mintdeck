@@ -132,6 +132,26 @@ served by `/api/asset/[id]`. Ids are random and bytes never change, so responses
 are `immutable` and the CDN answers almost every request. Logos are capped at
 2 MB.
 
+## Protecting the data
+
+There was no backup the day a stray shadow-database flag pointed at production
+and dropped every table. Three things now stand in the way:
+
+| | |
+| --- | --- |
+| `npm run db:export` | snapshots every table, images included, to `backups/<timestamp>.json` |
+| `npm run db:import <file>` | restores one, upserting so it is safe to re-run |
+| [scripts/guard-remote-db.sh](scripts/guard-remote-db.sh) | a `PreToolUse` hook that refuses destructive database commands unless they name a local target |
+
+**Generating migration SQL needs no database at all.** Prefer the
+schema-to-schema form of `prisma migrate diff` (`--from-schema-datamodel <old>
+--to-schema-datamodel <new> --script`). The `--from-migrations` form needs a
+shadow database, and a shadow database is scratch space the tool may drop — so
+it must never be pointed at a real one.
+
+Pull production credentials only when you need them (`vercel env pull`) and
+delete the file afterwards rather than leaving it in the project.
+
 ## Deploying
 
 `npm run build` runs `prisma generate && prisma migrate deploy && next build`.
