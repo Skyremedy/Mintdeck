@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { getPast } from "../../lib/queries"
+import { getPast, getPublicVisitorStats } from "../../lib/queries"
 import { formatMintDate, formatMintTime, formatPrice, formatSupply } from "../../lib/format"
 import Logo from "../components/Logo"
 import SiteHeader from "../components/SiteHeader"
@@ -13,12 +13,12 @@ export const metadata = {
 }
 
 export default async function PastMints() {
-  const collections = await getPast()
+  const [collections, stats] = await Promise.all([getPast(), getPublicVisitorStats()])
 
   return (
     <>
       <VisitorPing />
-      <SiteHeader />
+      <SiteHeader stats={stats} />
       <main className="shell">
         <div className="page-head">
           <h1 className="page-title">Past mints</h1>

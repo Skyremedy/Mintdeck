@@ -1,6 +1,6 @@
 import prisma from "./db"
 import { toView, type CollectionView } from "./format"
-import { CATEGORIES } from "./constants"
+import { CATEGORIES, PUBLIC_ONLINE_OFFSET, PUBLIC_VISITOR_OFFSET } from "./constants"
 
 /**
  * Move mints whose window has closed into the archive. Runs on read, which is
@@ -125,6 +125,23 @@ export async function getAdminStats(): Promise<AdminStats> {
     perCategory: CATEGORIES.map((c) => ({ category: c, count: counts.get(c) ?? 0 })),
     totalClicks: clickAgg._sum.clickCount ?? 0,
     loves,
+  }
+}
+
+export type PublicVisitorStats = { online: number; total: number }
+
+/**
+ * Counters for the public header. Padded by the offsets in constants.ts — see
+ * the note there. `getAdminStats` above returns the real numbers.
+ */
+export async function getPublicVisitorStats(): Promise<PublicVisitorStats> {
+  const [online, total] = await Promise.all([
+    prisma.visitor.count({ where: { lastSeen: { gte: new Date(Date.now() - ONLINE_WINDOW_MS) } } }),
+    prisma.visitor.count(),
+  ])
+  return {
+    online: online + PUBLIC_ONLINE_OFFSET,
+    total: total + PUBLIC_VISITOR_OFFSET,
   }
 }
 

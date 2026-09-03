@@ -1,4 +1,4 @@
-import { getUpcoming } from "../lib/queries"
+import { getPublicVisitorStats, getUpcoming } from "../lib/queries"
 import HomeClient from "./components/HomeClient"
 import SiteHeader from "./components/SiteHeader"
 import SiteFooter from "./components/SiteFooter"
@@ -9,12 +9,12 @@ import VisitorPing from "./components/VisitorPing"
 export const dynamic = "force-dynamic"
 
 export default async function Home() {
-  const collections = await getUpcoming()
+  const [collections, stats] = await Promise.all([getUpcoming(), getPublicVisitorStats()])
 
   return (
     <>
       <VisitorPing />
-      <SiteHeader />
+      <SiteHeader stats={stats} />
       <main className="shell">
         <HomeClient collections={collections} />
       </main>

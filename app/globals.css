@@ -1441,3 +1441,66 @@ select.field {
   background: var(--surface);
   box-shadow: var(--shadow-card);
 }
+
+/* ----------------------------------------------------------- visitor stats -- */
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.vstats {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  white-space: nowrap;
+}
+
+.vstats__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vstats__num {
+  font-size: 10px;
+  font-weight: 620;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.vstats__label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.vstats__sep {
+  width: 1px;
+  height: 10px;
+  background: var(--line-strong);
+}
+
+.vstats .dot--pulse {
+  width: 5px;
+  height: 5px;
+}
+
+@media (max-width: 520px) {
+  /* The word "visitors" is the first thing to go on a narrow header. */
+  .vstats__item:last-of-type .vstats__label {
+    display: none;
+  }
+  .vstats {
+    padding: 3px 7px;
+    gap: 5px;
+  }
+}

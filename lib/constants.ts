@@ -36,3 +36,14 @@ export const SORTS = [
 
 export type SortKey = (typeof SORTS)[number]["key"]
 export const DEFAULT_SORT: SortKey = "latest"
+
+/**
+ * Offsets added to the visitor counters shown in the public header.
+ *
+ * These are presentation padding, not measurement: the figures visitors see are
+ * the real counts plus these numbers. The admin dashboard deliberately shows
+ * the unpadded values, so internal reporting stays honest. Set both to 0 to
+ * show real traffic.
+ */
+export const PUBLIC_VISITOR_OFFSET = 5889
+export const PUBLIC_ONLINE_OFFSET = 9
