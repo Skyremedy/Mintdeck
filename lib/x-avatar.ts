@@ -1,9 +1,7 @@
 import "server-only"
 
-import { mkdir, writeFile } from "node:fs/promises"
-import path from "node:path"
-
 import prisma from "./db"
+import { ALLOWED_IMAGE_MIME, MAX_ASSET_BYTES, storeAsset } from "./assets"
 
 /**
  * Persistent memory for X profile pictures.
@@ -16,7 +14,7 @@ import prisma from "./db"
  *
  * Every result is recorded in the `XAvatar` table:
  *
- *   - a hit writes the image to disk once and is served locally forever after;
+ *   - a hit stores the image once and is served from our own domain thereafter;
  *   - a miss is remembered too, so a handle with no avatar cannot re-spend the
  *     daily quota on every page view;
  *   - a rate-limit is remembered for a short cooldown, so a page full of
@@ -25,19 +23,6 @@ import prisma from "./db"
  * The upshot is that a handle costs at most one upstream request for the life
  * of the app, and the browser never talks to the resolver directly.
  */
-
-const CACHE_DIR = path.join(process.cwd(), "public", "uploads", "x")
-const CACHE_URL_PREFIX = "/uploads/x"
-
-const EXT_BY_MIME: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/svg+xml": "svg",
-}
-
-const MAX_BYTES = 2 * 1024 * 1024
 
 /** How long a "this handle has no avatar" result is trusted before retrying. */
 const MISS_TTL_MS = 7 * 24 * 60 * 60 * 1000
@@ -77,10 +62,10 @@ async function download(url: string, headers?: HeadersInit): Promise<ResolveOutc
   if (!res.ok) return { kind: "miss" }
 
   const mime = (res.headers.get("content-type") ?? "").split(";")[0].trim()
-  if (!EXT_BY_MIME[mime]) return { kind: "miss" }
+  if (!ALLOWED_IMAGE_MIME.test(mime)) return { kind: "miss" }
 
   const bytes = await res.arrayBuffer()
-  if (bytes.byteLength === 0 || bytes.byteLength > MAX_BYTES) return { kind: "miss" }
+  if (bytes.byteLength === 0 || bytes.byteLength > MAX_ASSET_BYTES) return { kind: "miss" }
   return { kind: "image", value: { bytes, mime } }
 }
 
@@ -187,11 +172,7 @@ export async function getXAvatar(handle: string): Promise<AvatarResult> {
   }
 
   const { bytes, mime } = outcome.value
-  const filename = `${handleKey}.${EXT_BY_MIME[mime]}`
-  await mkdir(CACHE_DIR, { recursive: true })
-  await writeFile(path.join(CACHE_DIR, filename), Buffer.from(bytes))
-
-  const publicPath = `${CACHE_URL_PREFIX}/${filename}`
+  const publicPath = await storeAsset(bytes, mime)
   await prisma.xAvatar.upsert({
     where: { handle: handleKey },
     create: { handle: handleKey, status: "ok", path: publicPath },

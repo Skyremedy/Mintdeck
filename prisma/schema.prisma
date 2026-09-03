@@ -86,6 +86,18 @@ model XAvatar {
   fetchedAt DateTime @default(now())
 }
 
+/// Uploaded logos and cached X avatars.
+///
+/// A serverless host unpacks the app read-only, so there is nowhere on disk to
+/// write to at runtime. Image bytes therefore live here and are served by
+/// `/api/asset/[id]`. Logos are capped at 2 MB, so this stays small.
+model Asset {
+  id        String   @id
+  mime      String
+  bytes     Bytes
+  createdAt DateTime @default(now())
+}
+
 model Visitor {
   id        String   @id
   firstSeen DateTime @default(now())

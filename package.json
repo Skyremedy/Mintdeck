@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma db push && next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma skills sync || exit 0",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "db:baseline": "prisma migrate reset --force --skip-seed"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

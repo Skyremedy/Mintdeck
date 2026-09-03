@@ -40,9 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# runtime logo uploads
-/public/uploads
-
 # local sqlite database (schema lives in prisma/migrations)
 /prisma/*.db
 /prisma/*.db-journal

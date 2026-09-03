@@ -3,14 +3,11 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { randomUUID } from "node:crypto"
-import { mkdir, writeFile } from "node:fs/promises"
-import path from "node:path"
-
 import prisma from "./db"
 import { CATEGORIES, PRICE_TYPES } from "./constants"
 import { extractXHandle, xProfileUrl } from "./x"
 import { avatarFailureMessage, getXAvatar, type AvatarFailure } from "./x-avatar"
+import { ALLOWED_IMAGE_MIME, MAX_ASSET_BYTES, storeAsset } from "./assets"
 import {
   SESSION_COOKIE,
   SESSION_MAX_AGE,
@@ -56,25 +53,15 @@ export async function logout() {
   redirect("/admin/login")
 }
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads")
-const ALLOWED_IMAGE = /^image\/(png|jpeg|webp|gif|svg\+xml)$/
-const MAX_LOGO_BYTES = 2 * 1024 * 1024
-
-async function writeUpload(bytes: ArrayBuffer, mime: string): Promise<string> {
-  const ext = mime === "image/svg+xml" ? "svg" : mime.split("/")[1].replace("jpeg", "jpg")
-  const name = `${randomUUID()}.${ext}`
-  await mkdir(UPLOAD_DIR, { recursive: true })
-  await writeFile(path.join(UPLOAD_DIR, name), Buffer.from(bytes))
-  return `/uploads/${name}`
-}
-
-/** Stores an uploaded logo under /public/uploads and returns its public path. */
+/** Stores an uploaded logo and returns the path the browser should request. */
 async function storeLogo(file: File | null): Promise<string | null> {
   if (!file || file.size === 0) return null
-  if (!ALLOWED_IMAGE.test(file.type)) throw new Error("Logo must be a PNG, JPEG, WEBP, GIF or SVG.")
-  if (file.size > MAX_LOGO_BYTES) throw new Error("Logo must be under 2 MB.")
+  if (!ALLOWED_IMAGE_MIME.test(file.type)) {
+    throw new Error("Logo must be a PNG, JPEG, WEBP, GIF or SVG.")
+  }
+  if (file.size > MAX_ASSET_BYTES) throw new Error("Logo must be under 2 MB.")
 
-  return writeUpload(await file.arrayBuffer(), file.type)
+  return storeAsset(await file.arrayBuffer(), file.type)
 }
 
 function cleanUrl(value: FormDataEntryValue | null): string | null {

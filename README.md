@@ -5,14 +5,19 @@ prediction-market-style tile grid.
 
 ## Stack
 
-Next.js 16 (App Router) · React 19 · Prisma 5 + SQLite · plain CSS design system
-in [app/globals.css](app/globals.css). No UI or icon dependencies.
+Next.js 16 (App Router) · React 19 · Prisma 5 + **Postgres** · plain CSS design
+system in [app/globals.css](app/globals.css). No UI or icon dependencies.
+
+Everything runs on a read-only filesystem, so it deploys to a serverless host
+(Vercel) without a persistent disk: images live in the database, not on disk.
 
 ## Getting started
 
 ```bash
 npm install
-npm run db:reset   # applies migrations to prisma/dev.db and loads demo data
+# DATABASE_URL must be a Postgres connection string — see .env
+npm run db:deploy   # apply migrations
+npm run db:seed     # optional: load demo collections
 npm run dev
 ```
 
@@ -120,6 +125,30 @@ resolver is down. Set `UNAVATAR_API_KEY` (an unavatar.io key sent as the
 the resolver in that one file. If a lookup does fail, the admin form says why —
 rate-limited vs. no such avatar — rather than failing silently.
 
-**Logo uploads** are written to `public/uploads`, which assumes a writable disk.
-On a serverless host, use the image-URL field or swap `storeLogo()` in
-[lib/admin-actions.ts](lib/admin-actions.ts) for object storage.
+**Images live in the database.** A serverless host unpacks the app read-only —
+there is no disk to write to at runtime — so uploaded logos and cached X avatars
+are stored as rows in the `Asset` table by [lib/assets.ts](lib/assets.ts) and
+served by `/api/asset/[id]`. Ids are random and bytes never change, so responses
+are `immutable` and the CDN answers almost every request. Logos are capped at
+2 MB.
+
+## Deploying
+
+`npm run build` runs `prisma generate && prisma migrate deploy && next build`.
+
+- **`migrate deploy`, never `db push`.** `db push` force-matches the database to
+  the schema and will drop columns and data to do it — on every deploy.
+  `migrate deploy` applies only pending migrations and never destroys data.
+- **`generate` is explicit** because `node_modules` is cached between builds, so
+  a schema change would otherwise ship against a stale client.
+
+**Adopting migrations on a database created with `db push`:** that database has
+no `_prisma_migrations` table, so `migrate deploy` will try to create tables that
+already exist and fail. Once, against an empty database:
+
+```bash
+DATABASE_URL="<your production url>" npm run db:baseline
+```
+
+That drops and recreates the schema through the migration history. It is
+destructive — only run it while the database has no data you care about.
