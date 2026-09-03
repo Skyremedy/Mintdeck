@@ -28,6 +28,10 @@ model Collection {
 
   website  String?
   twitter  String?
+  /// Lower-cased X handle, kept alongside `twitter` purely as a dedupe key —
+  /// one project owns one handle, so this is what stops the same collection
+  /// being added twice under slightly different names.
+  xHandle  String?  @unique
   discord  String?
   telegram String?
   opensea  String?

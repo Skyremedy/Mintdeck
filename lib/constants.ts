@@ -1,8 +1,11 @@
 /** Mint Deck is Arc-only — the chain is a constant, not a per-collection field. */
 export const CHAIN = "Arc"
 
-/** What a collection can be filed under. */
-export const CATEGORIES = ["GameFi", "PFP", "Art"] as const
+/**
+ * What a collection can be filed under. "Others" is the catch-all for projects
+ * that have not said enough about themselves to place yet.
+ */
+export const CATEGORIES = ["GameFi", "PFP", "Art", "Utility", "Others"] as const
 
 export type Category = (typeof CATEGORIES)[number]
 

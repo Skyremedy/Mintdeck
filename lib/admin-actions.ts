@@ -87,6 +87,7 @@ type CollectionInput = {
   priceCurrency: string | null
   website: string | null
   twitter: string | null
+  xHandle: string | null
   discord: string | null
   telegram: string | null
   opensea: string | null
@@ -180,6 +181,8 @@ async function parseCollection(formData: FormData, currentLogo?: string): Promis
     priceCurrency,
     website: cleanUrl(formData.get("website")),
     twitter,
+    // Lower-cased so the unique index catches @Foo and @foo as the same project.
+    xHandle: xHandle ? xHandle.toLowerCase() : null,
     discord: cleanUrl(formData.get("discord")),
     telegram: cleanUrl(formData.get("telegram")),
     opensea: cleanUrl(formData.get("opensea")),
@@ -202,6 +205,13 @@ export async function createCollection(_prev: ActionState, formData: FormData): 
     data = await parseCollection(formData)
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Could not save that collection." }
+  }
+
+  if (data.xHandle) {
+    const clash = await prisma.collection.findUnique({ where: { xHandle: data.xHandle } })
+    if (clash) {
+      return { error: `@${data.xHandle} is already listed as "${clash.name}".` }
+    }
   }
 
   await prisma.collection.create({ data })
@@ -231,6 +241,13 @@ export async function updateCollection(_prev: ActionState, formData: FormData): 
     data = await parseCollection(formData, current.logo)
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Could not save that collection." }
+  }
+
+  if (data.xHandle) {
+    const clash = await prisma.collection.findUnique({ where: { xHandle: data.xHandle } })
+    if (clash && clash.id !== id) {
+      return { error: `@${data.xHandle} is already listed as "${clash.name}".` }
+    }
   }
 
   await prisma.collection.update({ where: { id }, data })
