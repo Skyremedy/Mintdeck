@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Collection {
+  id       Int    @id @default(autoincrement())
+  name     String
+  logo     String
+  category String
+
+  /// Null means the mint date is TBA. When `timeTba` is true only the
+  /// calendar day is meaningful and the row archives at end of that day.
+  mintAt  DateTime?
+  timeTba Boolean   @default(false)
+
+  /// Total items in the collection. Null when the supply is not announced.
+  supply Int?
+
+  /// 'Free' | 'TBA' | 'Price'
+  priceType     String
+  priceValue    Float?
+  priceCurrency String?
+
+  website  String?
+  twitter  String?
+  discord  String?
+  telegram String?
+  opensea  String?
+
+  /// 'Upcoming' | 'Past'
+  status         String @default("Upcoming")
+  clickCount     Int    @default(0)
+  /// 1-based slot in the Trending tab, or null for automatic ranking.
+  pinnedPosition Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  loves Love[]
+
+  @@index([status, mintAt])
+  @@index([category])
+}
+
+model Submission {
+  id     Int    @id @default(autoincrement())
+  handle String
+  /// 'Pending' | 'Approved' | 'Rejected'
+  status String @default("Pending")
+  note   String?
+
+  submittedAt DateTime  @default(now())
+  reviewedAt  DateTime?
+
+  @@index([status, submittedAt])
+}
+
+/// One row per (collection, browser). The unique pair means a person can love a
+/// collection once, so a count is "how many people love this mint" rather than
+/// a click tally.
+model Love {
+  id           Int      @id @default(autoincrement())
+  collectionId Int
+  visitorId    String
+  createdAt    DateTime @default(now())
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, visitorId])
+  @@index([collectionId])
+}
+
+/// Remembers every X avatar ever fetched, so a handle costs one upstream
+/// request for the life of the app. `status` also records misses, which stops a
+/// bad handle re-spending the resolver's daily quota on every page view.
+model XAvatar {
+  handle    String   @id
+  /// 'ok' | 'missing'
+  status    String
+  path      String?
+  fetchedAt DateTime @default(now())
+}
+
+model Visitor {
+  id        String   @id
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @default(now())
+
+  @@index([lastSeen])
+}

@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
+import path from "node:path"
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Pin the workspace root: a package-lock.json above the repo would otherwise
+  // make Turbopack guess the wrong project root.
+  turbopack: { root: path.resolve(".") },
+}
 
-export default nextConfig;
+export default nextConfig
