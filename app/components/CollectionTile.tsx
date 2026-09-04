@@ -14,12 +14,7 @@ import Logo from "./Logo"
 import { useLove } from "./LoveProvider"
 import { ClockIcon, DiscordIcon, GlobeIcon, OpenSeaIcon, PinIcon, TelegramIcon, XIcon } from "./icons"
 
-/** Where a tile click sends you: the collection's own site when it has one. */
-function primaryLink(c: CollectionView): string | null {
-  return c.website ?? c.twitter ?? c.opensea ?? c.discord ?? c.telegram ?? null
-}
-
-function Countdown({ collection, href }: { collection: CollectionView; href: string | null }) {
+function Countdown({ collection }: { collection: CollectionView }) {
   // Rendered only after mount: a relative time computed on the server would
   // disagree with the client and trip a hydration mismatch.
   const [label, setLabel] = useState<string | null>(null)
@@ -36,16 +31,7 @@ function Countdown({ collection, href }: { collection: CollectionView; href: str
   const exactTime = formatMintTime(collection.mintAt, collection.timeTba)
 
   return (
-    <span
-      className={`chip chip--tip ${label === "Live" ? "chip--soon" : ""}`}
-      data-tip={exactTime}
-      // The tile's stretched link sits above static content, so the chip needs
-      // to opt back in to hover — and then forward clicks itself, rather than
-      // leaving a patch of the card that does nothing.
-      onClick={() => {
-        if (href) window.open(href, "_blank", "noopener,noreferrer")
-      }}
-    >
+    <span className={`chip chip--tip ${label === "Live" ? "chip--soon" : ""}`} data-tip={exactTime}>
       {label === "Live" ? <span className="dot dot--pulse" /> : <ClockIcon />}
       {label === "Live" ? "Minting" : label}
       <span className="sr-only">— mints at {exactTime}</span>
@@ -71,7 +57,6 @@ export default function CollectionTile({
   const { count: loveCount, loved, toggle } = useLove(collection.id)
   const [burst, setBurst] = useState(false)
   const counted = useRef(false)
-  const href = primaryLink(collection)
   const price = formatPrice(collection)
   const priceModifier =
     collection.priceType === "Free"
@@ -80,9 +65,10 @@ export default function CollectionTile({
         ? " stat__value--tba"
         : ""
 
-  // One count per tile per page view keeps the trending signal from being
-  // inflated by someone clicking the same card repeatedly.
-  const handleClick = () => {
+  // Trending ranks by interest, and the outbound links are now the only thing
+  // to click — so following one is what counts. Once per tile per page view,
+  // so repeatedly opening the same links cannot inflate the ranking.
+  const countOnce = () => {
     if (counted.current) return
     counted.current = true
     void recordClick(collection.id)
@@ -92,10 +78,7 @@ export default function CollectionTile({
   const pinned = collection.pinnedPosition != null
 
   return (
-    <article
-      className={`tile${showRank || pinned ? " tile--ranked" : ""}`}
-      onClick={handleClick}
-    >
+    <article className={`tile${showRank || pinned ? " tile--ranked" : ""}`}>
       {pinned ? (
         <span className="chip chip--rank chip--accent" title={`Pinned to #${collection.pinnedPosition}`}>
           <PinIcon />
@@ -108,23 +91,10 @@ export default function CollectionTile({
       <div className="tile__head">
         <Logo src={collection.logo} name={collection.name} />
         <div className="tile__identity">
-          <h3 className="tile__name">
-            {href ? (
-              <a
-                className="tile__link"
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {collection.name}
-              </a>
-            ) : (
-              collection.name
-            )}
-          </h3>
+          <h3 className="tile__name">{collection.name}</h3>
           <div className="tile__meta">
             <span className="chip">{collection.category}</span>
-            <Countdown collection={collection} href={href} />
+            <Countdown collection={collection} />
           </div>
         </div>
       </div>
@@ -168,6 +138,7 @@ export default function CollectionTile({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={countOnce}
               title={
                 key === "website"
                   ? `Visit ${collection.name}`
