@@ -135,10 +135,16 @@ export type PublicVisitorStats = { online: number; total: number }
  * the note there. `getAdminStats` above returns the real numbers.
  */
 export async function getPublicVisitorStats(): Promise<PublicVisitorStats> {
-  const [online, total] = await Promise.all([
-    prisma.visitor.count({ where: { lastSeen: { gte: new Date(Date.now() - ONLINE_WINDOW_MS) } } }),
-    prisma.visitor.count(),
-  ])
+  // One round trip rather than two: this runs on every page view and on a
+  // timer, so it is the hottest query in the app.
+  const since = new Date(Date.now() - ONLINE_WINDOW_MS)
+  const [row] = await prisma.$queryRaw<{ online: bigint; total: bigint }[]>`
+    SELECT COUNT(*) FILTER (WHERE "lastSeen" >= ${since}) AS online,
+           COUNT(*) AS total
+    FROM "Visitor"
+  `
+  const online = Number(row?.online ?? 0)
+  const total = Number(row?.total ?? 0)
   return {
     online: online + PUBLIC_ONLINE_OFFSET,
     total: total + PUBLIC_VISITOR_OFFSET,

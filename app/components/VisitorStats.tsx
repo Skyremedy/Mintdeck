@@ -21,7 +21,7 @@ export default function VisitorStats({ initial }: { initial: PublicVisitorStats 
         })
         .catch(() => {})
     }
-    const id = setInterval(load, 30_000)
+    const id = setInterval(load, 60_000)
     document.addEventListener("visibilitychange", load)
     return () => {
       cancelled = true
