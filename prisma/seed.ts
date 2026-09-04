@@ -3,8 +3,8 @@ import { PrismaClient } from "@prisma/client"
 const prisma = new PrismaClient()
 
 /**
- * Mint Deck is Arc-only, so every row here is an Arc collection and `category`
- * is what kind of collection it is, not which chain it lives on.
+ * `chain` is which blockchain a collection mints on; `category` is what kind of
+ * collection it is. They are independent.
  *
  * Dates are relative so a freshly seeded database always has live upcoming
  * mints. Rows are created in array order, so the last entries are the newest
@@ -20,6 +20,7 @@ function inDays(days: number, hour = 16, minute = 0): Date {
 const collections = [
   {
     name: "Arc Nodes",
+    chain: "Arc",
     website: "https://arcnodes.xyz",
     supply: 5000,
     logo: "https://picsum.photos/seed/hlnodes/200",
@@ -36,6 +37,7 @@ const collections = [
   },
   {
     name: "Arc Foundry",
+    chain: "Arc",
     website: "https://arcfoundry.xyz",
     supply: 10000,
     logo: "https://picsum.photos/seed/arcfoundry/200",
@@ -48,6 +50,7 @@ const collections = [
   },
   {
     name: "Bloomfield",
+    chain: "Base",
     website: "https://bloomfield.art",
     supply: 3333,
     logo: "https://picsum.photos/seed/basebloom/200",
@@ -64,6 +67,7 @@ const collections = [
   },
   {
     name: "Sunbird Syndicate",
+    chain: "Solana",
     website: "https://sunbirdsyndicate.xyz",
     supply: 8888,
     logo: "https://picsum.photos/seed/sunbirds/200",
@@ -78,6 +82,7 @@ const collections = [
   },
   {
     name: "Ledger Cards",
+    chain: "Robinhood",
     website: "https://ledgercards.xyz",
     supply: 25000,
     logo: "https://picsum.photos/seed/rhcards/200",
@@ -92,6 +97,7 @@ const collections = [
   },
   {
     name: "Ethereal Glyphs",
+    chain: "Ethereum",
     website: "https://etherealglyphs.art",
     supply: 10000,
     logo: "https://picsum.photos/seed/glyphs/200",
@@ -109,6 +115,7 @@ const collections = [
   },
   {
     name: "Onchain Cartographers",
+    chain: "Ethereum",
     logo: "https://picsum.photos/seed/carto/200",
     category: "Art",
     mintAt: null,
@@ -119,6 +126,7 @@ const collections = [
   },
   {
     name: "Lightfield",
+    chain: "Base",
     website: "https://lightfield.xyz",
     supply: 1111,
     logo: "https://picsum.photos/seed/lightfield/200",
@@ -131,6 +139,7 @@ const collections = [
   },
   {
     name: "Solstice Relics",
+    chain: "Solana",
     logo: "https://picsum.photos/seed/solstice/200",
     category: "PFP",
     mintAt: null,
@@ -141,6 +150,7 @@ const collections = [
   },
   {
     name: "Arc Terminal Pass",
+    chain: "Arc",
     website: "https://arcterminal.xyz",
     supply: 2500,
     logo: "https://picsum.photos/seed/arcterm/200",
@@ -155,6 +165,7 @@ const collections = [
   // Already closed — lands in the archive on first read.
   {
     name: "Meridian Vaults",
+    chain: "Ethereum",
     website: "https://meridianvaults.xyz",
     supply: 7777,
     logo: "https://picsum.photos/seed/meridian/200",
@@ -170,6 +181,7 @@ const collections = [
   },
   {
     name: "Sigil Wardens",
+    chain: "Hyperliquid",
     supply: 4200,
     logo: "https://picsum.photos/seed/sigils/200",
     category: "GameFi",
@@ -197,7 +209,7 @@ async function main() {
     ],
   })
 
-  console.log(`Seeded ${collections.length} Arc collections and 3 submissions.`)
+  console.log(`Seeded ${collections.length} collections and 3 submissions.`)
 }
 
 main()

@@ -2,7 +2,14 @@
 
 import { useActionState, useEffect, useState } from "react"
 import Link from "next/link"
-import { CATEGORIES, CURRENCIES, DEFAULT_CURRENCY, PRICE_TYPES } from "../../../lib/constants"
+import {
+  CATEGORIES,
+  CHAINS,
+  CURRENCIES,
+  DEFAULT_CHAIN,
+  DEFAULT_CURRENCY,
+  PRICE_TYPES,
+} from "../../../lib/constants"
 import type { CollectionView } from "../../../lib/format"
 import type { ActionState } from "../../../lib/admin-actions"
 import { extractXHandle } from "../../../lib/x"
@@ -95,6 +102,22 @@ export default function CollectionForm({
             required
             maxLength={80}
           />
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="chain">Chain</label>
+          <select
+            id="chain"
+            name="chain"
+            className="field"
+            defaultValue={collection?.chain ?? DEFAULT_CHAIN}
+          >
+            {CHAINS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-row">
@@ -314,19 +337,6 @@ export default function CollectionForm({
             <option value="Upcoming">Upcoming — live on the homepage</option>
             <option value="Past">Past — archived</option>
           </select>
-        </div>
-
-        <div className="form-row">
-          <label htmlFor="pinnedPosition">Pin to trending position</label>
-          <input
-            id="pinnedPosition"
-            name="pinnedPosition"
-            type="number"
-            min="1"
-            className="field"
-            defaultValue={collection?.pinnedPosition ?? ""}
-            placeholder="Leave empty for automatic ranking"
-          />
         </div>
 
         <div className="form-actions">

@@ -10,7 +10,7 @@ import VisitorStats from "../components/VisitorStats"
 export const dynamic = "force-dynamic"
 
 export const metadata = {
-  title: "Past Arc mints — Mint Deck",
+  title: "Past mints — Mint Deck",
 }
 
 export default async function PastMints() {
@@ -25,8 +25,8 @@ export default async function PastMints() {
           <div className="page-head__text">
             <h1 className="page-title">Past mints</h1>
             <p className="page-sub">
-              Arc collections whose mint window has closed. Entries land here automatically —
-              nothing is archived by hand.
+              Collections whose mint window has closed. Entries land here automatically — nothing
+              is archived by hand.
             </p>
           </div>
           <VisitorStats initial={stats} />
@@ -38,6 +38,7 @@ export default async function PastMints() {
               <thead>
                 <tr>
                   <th>Collection</th>
+                  <th>Chain</th>
                   <th>Category</th>
                   <th>Minted</th>
                   <th>Supply</th>
@@ -48,7 +49,7 @@ export default async function PastMints() {
               <tbody>
                 {collections.length === 0 ? (
                   <tr>
-                    <td className="table__empty" colSpan={6}>
+                    <td className="table__empty" colSpan={7}>
                       Nothing archived yet. <Link href="/">See what&apos;s upcoming →</Link>
                     </td>
                   </tr>
@@ -67,6 +68,7 @@ export default async function PastMints() {
                           )}
                         </span>
                       </td>
+                      <td className="table__muted">{c.chain}</td>
                       <td className="table__muted">{c.category}</td>
                       <td className="table__muted num">
                         {formatMintDate(c.mintAt)}

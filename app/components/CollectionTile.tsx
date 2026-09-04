@@ -93,7 +93,7 @@ export default function CollectionTile({
         <div className="tile__identity">
           <h3 className="tile__name">{collection.name}</h3>
           <div className="tile__meta">
-            <span className="chip">{collection.category}</span>
+            <span className="chip">{collection.chain}</span>
             <Countdown collection={collection} />
           </div>
         </div>

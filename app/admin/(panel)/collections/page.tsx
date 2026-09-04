@@ -16,8 +16,8 @@ export default async function ManageCollections() {
         <div>
           <h1 className="page-title">Collections</h1>
           <p className="page-sub">
-            Add, edit, archive or delete any Arc collection. Upcoming mints archive themselves
-            once their window closes.
+            Add, edit, archive or delete any collection. Upcoming mints archive themselves once
+            their window closes.
           </p>
         </div>
         <Link href="/admin/collections/new" className="btn btn--accent">
@@ -31,6 +31,7 @@ export default async function ManageCollections() {
             <thead>
               <tr>
                 <th>Collection</th>
+                <th>Chain</th>
                 <th>Category</th>
                 <th>Mint</th>
                 <th>Supply</th>
@@ -44,7 +45,7 @@ export default async function ManageCollections() {
             <tbody>
               {collections.length === 0 ? (
                 <tr>
-                  <td className="table__empty" colSpan={7}>
+                  <td className="table__empty" colSpan={10}>
                     No collections yet. <Link href="/admin/collections/new">Add the first one →</Link>
                   </td>
                 </tr>
@@ -62,6 +63,7 @@ export default async function ManageCollections() {
                         )}
                       </span>
                     </td>
+                    <td className="table__muted">{c.chain}</td>
                     <td className="table__muted">{c.category}</td>
                     <td className="table__muted num">
                       {formatMintDate(c.mintAt)}

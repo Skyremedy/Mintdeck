@@ -12,8 +12,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Mint Deck — upcoming Arc mints",
-  description: "Discover upcoming NFT mints on Arc — trending, just listed, GameFi, PFP and art.",
+  title: "Mint Deck — upcoming NFT mints",
+  description:
+    "Discover upcoming NFT mints across Ethereum, Solana, Base, Arc and more — trending, just listed, GameFi, PFP and art.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,10 +1,12 @@
 import type { Collection } from "@prisma/client"
+import { LOVE_WEIGHT, TRENDING_LIMIT } from "./constants"
 
 /** Everything the tiles and tables need, safe to hand to a Client Component. */
 export type CollectionView = {
   id: number
   name: string
   logo: string
+  chain: string
   category: string
   /** ISO string, or null when the date is TBA. */
   mintAt: string | null
@@ -31,6 +33,7 @@ export function toView(c: Collection & { _count?: { loves: number } }): Collecti
     id: c.id,
     name: c.name,
     logo: c.logo,
+    chain: c.chain,
     category: c.category,
     mintAt: c.mintAt ? c.mintAt.toISOString() : null,
     timeTba: c.timeTba,
@@ -141,20 +144,28 @@ export function isTba(c: CollectionView): boolean {
   return c.mintAt === null
 }
 
+/** What Trending ranks on: clicks plus loves, with loves weighted up. */
+export function trendingScore(c: { clickCount: number; loveCount: number }): number {
+  return c.clickCount + c.loveCount * LOVE_WEIGHT
+}
+
 /**
  * Trending order: pinned collections hold their 1-based slot, every other slot
- * is filled by the next-highest click count. Duplicate or out-of-range pins
- * cascade to the next free slot instead of dropping a collection.
+ * is filled by the next-highest scoring collection. Duplicate or out-of-range
+ * pins cascade to the next free slot instead of dropping a collection.
+ *
+ * Only the first `limit` make it out — a pin beyond that is simply off the end
+ * of the list, the same as it would be for the public page.
  */
-export function orderTrending<T extends { pinnedPosition: number | null; clickCount: number; id: number }>(
-  items: T[]
-): T[] {
+export function orderTrending<
+  T extends { pinnedPosition: number | null; clickCount: number; loveCount: number; id: number },
+>(items: T[], limit: number = TRENDING_LIMIT): T[] {
   const pinned = items
     .filter((i) => i.pinnedPosition != null)
     .sort((a, b) => a.pinnedPosition! - b.pinnedPosition! || a.id - b.id)
   const auto = items
     .filter((i) => i.pinnedPosition == null)
-    .sort((a, b) => b.clickCount - a.clickCount || a.id - b.id)
+    .sort((a, b) => trendingScore(b) - trendingScore(a) || a.id - b.id)
 
   const slots = new Map<number, T>()
   for (const p of pinned) {
@@ -171,6 +182,7 @@ export function orderTrending<T extends { pinnedPosition: number | null; clickCo
     const p = slots.get(pos)
     if (p) out.push(p)
     else if (next < auto.length) out.push(auto[next++])
+    if (out.length >= limit) break
   }
   return out
 }

@@ -4,7 +4,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import prisma from "./db"
-import { CATEGORIES, PRICE_TYPES } from "./constants"
+import { CATEGORIES, CHAINS, PRICE_TYPES } from "./constants"
 import { extractXHandle, xProfileUrl } from "./x"
 import { avatarFailureMessage, getXAvatar, type AvatarFailure } from "./x-avatar"
 import { ALLOWED_IMAGE_MIME, MAX_ASSET_BYTES, storeAsset } from "./assets"
@@ -78,6 +78,7 @@ function cleanUrl(value: FormDataEntryValue | null): string | null {
 type CollectionInput = {
   name: string
   logo: string
+  chain: string
   category: string
   mintAt: Date | null
   timeTba: boolean
@@ -92,7 +93,6 @@ type CollectionInput = {
   telegram: string | null
   opensea: string | null
   status: string
-  pinnedPosition: number | null
 }
 
 async function parseCollection(formData: FormData, currentLogo?: string): Promise<CollectionInput> {
@@ -101,6 +101,11 @@ async function parseCollection(formData: FormData, currentLogo?: string): Promis
 
   const category = String(formData.get("category") ?? "")
   if (!CATEGORIES.includes(category as (typeof CATEGORIES)[number])) {
+    throw new Error("Pick a valid category.")
+  }
+
+  const chain = String(formData.get("chain") ?? "")
+  if (!CHAINS.includes(chain as (typeof CHAINS)[number])) {
     throw new Error("Pick a valid chain.")
   }
 
@@ -165,13 +170,10 @@ async function parseCollection(formData: FormData, currentLogo?: string): Promis
     if (!priceCurrency) throw new Error("Pick a currency for the mint price.")
   }
 
-  const pinnedRaw = String(formData.get("pinnedPosition") ?? "").trim()
-  const pinnedPosition = pinnedRaw ? Math.max(1, Math.trunc(Number(pinnedRaw))) : null
-  if (pinnedRaw && !Number.isFinite(Number(pinnedRaw))) throw new Error("Pin position must be a number.")
-
   return {
     name,
     logo,
+    chain,
     category,
     mintAt,
     timeTba,
@@ -187,7 +189,6 @@ async function parseCollection(formData: FormData, currentLogo?: string): Promis
     telegram: cleanUrl(formData.get("telegram")),
     opensea: cleanUrl(formData.get("opensea")),
     status: formData.get("status") === "Past" ? "Past" : "Upcoming",
-    pinnedPosition,
   }
 }
 

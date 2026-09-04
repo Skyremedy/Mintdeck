@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { getAdminStats, getSubmissions, getUpcoming } from "../../../lib/queries"
-import { formatMintDate, orderTrending } from "../../../lib/format"
+import { formatMintDate, orderTrending, trendingScore } from "../../../lib/format"
 import { deleteSubmission, rejectSubmission, resetClicks, setPinnedPosition } from "../../../lib/admin-actions"
 import Logo from "../../components/Logo"
 import VisitorStats from "../../components/admin/VisitorStats"
@@ -19,6 +19,7 @@ export default async function AdminOverview() {
   const pending = submissions.filter((s) => s.status === "Pending")
   const trending = orderTrending(upcoming)
   const maxCategory = Math.max(1, ...stats.perCategory.map((c) => c.count))
+  const maxChain = Math.max(1, ...stats.perChain.map((c) => c.count))
 
   return (
     <div className="stack" style={{ paddingTop: 32 }}>
@@ -81,6 +82,28 @@ export default async function AdminOverview() {
 
         <section className="panel">
           <div className="panel__head">
+            <h2 className="section-title">Collections per chain</h2>
+            <span className="badge">{stats.perChain.length} in use</span>
+          </div>
+          <div className="panel__body">
+            {stats.perChain.length === 0 ? (
+              <p className="hint">No collections yet.</p>
+            ) : (
+              stats.perChain.map((c) => (
+                <div className="bar-row" key={c.chain}>
+                  <span className="table__muted">{c.chain}</span>
+                  <span className="bar-track">
+                    <span className="bar-fill" style={{ width: `${(c.count / maxChain) * 100}%` }} />
+                  </span>
+                  <span className="bar-value num">{c.count}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="panel__head">
             <h2 className="section-title">Pending queue</h2>
             <span className="badge">{pending.length} waiting</span>
           </div>
@@ -128,7 +151,7 @@ export default async function AdminOverview() {
       <section className="panel">
         <div className="panel__head">
           <h2 className="section-title">Trending control</h2>
-          <span className="badge">Pinned slots hold; the rest fill by clicks</span>
+          <span className="badge">Top 15 across every chain — pins hold, the rest rank by score</span>
         </div>
         <div className="table-scroll">
           <table className="table">
@@ -137,15 +160,16 @@ export default async function AdminOverview() {
                 <th style={{ width: 56 }}>Slot</th>
                 <th>Collection</th>
                 <th>Mint</th>
-                <th style={{ width: 80 }}>Clicks</th>
-                <th style={{ width: 80 }}>Loves</th>
+                <th style={{ width: 70 }}>Clicks</th>
+                <th style={{ width: 70 }}>Loves</th>
+                <th style={{ width: 70 }}>Score</th>
                 <th style={{ width: 260 }}>Pin</th>
               </tr>
             </thead>
             <tbody>
               {trending.length === 0 ? (
                 <tr>
-                  <td className="table__empty" colSpan={6}>
+                  <td className="table__empty" colSpan={7}>
                     No upcoming collections to rank.
                   </td>
                 </tr>
@@ -167,6 +191,7 @@ export default async function AdminOverview() {
                     <td className="table__muted num">{formatMintDate(c.mintAt)}</td>
                     <td className="num">{c.clickCount}</td>
                     <td className="num">{c.loveCount}</td>
+                    <td className="num">{trendingScore(c)}</td>
                     <td>
                       <div className="table__actions" style={{ justifyContent: "flex-start" }}>
                         <form action={setPinnedPosition} style={{ display: "flex", gap: 6 }}>

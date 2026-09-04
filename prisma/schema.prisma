@@ -11,6 +11,10 @@ model Collection {
   id       Int    @id @default(autoincrement())
   name     String
   logo     String
+
+  /// Which blockchain the collection mints on. Distinct from `category`, which
+  /// is what kind of collection it is.
+  chain    String @default("Arc")
   category String
 
   /// Null means the mint date is TBA. When `timeTba` is true only the
@@ -49,6 +53,7 @@ model Collection {
 
   @@index([status, mintAt])
   @@index([category])
+  @@index([chain])
 }
 
 model Submission {

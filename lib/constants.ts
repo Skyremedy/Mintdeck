@@ -1,5 +1,28 @@
-/** Mint Deck is Arc-only — the chain is a constant, not a per-collection field. */
-export const CHAIN = "Arc"
+/** Chains a collection can mint on. Separate from CATEGORIES, which is what
+ *  kind of collection it is. */
+export const CHAINS = [
+  "Ethereum",
+  "Solana",
+  "Base",
+  "Arc",
+  "Hyperliquid",
+  "Robinhood",
+  "Bitcoin",
+  "Abstract",
+  "Berachain",
+  "Monad",
+  "Polygon",
+  "ApeChain",
+  "Ronin",
+  "Blast",
+] as const
+
+export type Chain = (typeof CHAINS)[number]
+
+export const DEFAULT_CHAIN: string = "Arc"
+
+/** Sentinel for "no chain filter" in the public chain picker. */
+export const ALL_CHAINS = "All"
 
 /**
  * What a collection can be filed under. "Others" is the catch-all for projects
@@ -13,11 +36,11 @@ export type Category = (typeof CATEGORIES)[number]
 export const TRENDING_TAB = "Trending"
 export const JUST_IN_TAB = "Just In"
 
-/** The tab strip. Five in total; the page lands on "Just In". */
+/** The tab strip: the two views plus every category. Lands on "Just In". */
 export const TABS = [TRENDING_TAB, JUST_IN_TAB, ...CATEGORIES] as const
 export const DEFAULT_TAB: string = JUST_IN_TAB
 
-/** Arc settles in USDC, so that is the default unit for a priced mint. */
+/** Default unit for a priced mint; every currency below stays selectable. */
 export const DEFAULT_CURRENCY = "USDC"
 export const CURRENCIES = ["USDC", "USD", "ETH", "BTC"] as const
 
@@ -30,12 +53,23 @@ export type PriceType = (typeof PRICE_TYPES)[number]
  */
 export const SORTS = [
   { key: "latest", label: "Latest added" },
-  { key: "mint", label: "Mint date" },
+  { key: "mint", label: "Minting soon" },
   { key: "tba", label: "TBA" },
 ] as const
 
 export type SortKey = (typeof SORTS)[number]["key"]
 export const DEFAULT_SORT: SortKey = "latest"
+
+/**
+ * Trending ranks on clicks *and* loves. Loves are far rarer than clicks — a
+ * love is deliberate where a click is casual — so an unweighted sum would let
+ * clicks drown them out entirely. This is the dial that decides how much a love
+ * is worth; tune it once there is real traffic to judge by.
+ */
+export const LOVE_WEIGHT = 20
+
+/** Trending shows only this many collections. */
+export const TRENDING_LIMIT = 15
 
 /**
  * Offsets added to the visitor counters shown in the public header.

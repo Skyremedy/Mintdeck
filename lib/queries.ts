@@ -1,6 +1,6 @@
 import prisma from "./db"
 import { toView, type CollectionView } from "./format"
-import { CATEGORIES, PUBLIC_ONLINE_OFFSET, PUBLIC_VISITOR_OFFSET } from "./constants"
+import { CATEGORIES, CHAINS, PUBLIC_ONLINE_OFFSET, PUBLIC_VISITOR_OFFSET } from "./constants"
 
 /**
  * Move mints whose window has closed into the archive. Runs on read, which is
@@ -74,6 +74,7 @@ export type AdminStats = {
   past: number
   pendingSubmissions: number
   perCategory: { category: string; count: number }[]
+  perChain: { chain: string; count: number }[]
   totalClicks: number
   loves: number
 }
@@ -96,6 +97,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     past,
     pendingSubmissions,
     grouped,
+    groupedChain,
     clickAgg,
     loves,
   ] = await Promise.all([
@@ -109,11 +111,13 @@ export async function getAdminStats(): Promise<AdminStats> {
     prisma.collection.count({ where: { status: "Past" } }),
     prisma.submission.count({ where: { status: "Pending" } }),
     prisma.collection.groupBy({ by: ["category"], _count: { _all: true } }),
+    prisma.collection.groupBy({ by: ["chain"], _count: { _all: true } }),
     prisma.collection.aggregate({ _sum: { clickCount: true } }),
     prisma.love.count(),
   ])
 
   const counts = new Map(grouped.map((g) => [g.category, g._count._all]))
+  const chainCounts = new Map(groupedChain.map((g) => [g.chain, g._count._all]))
 
   return {
     visitors: { today, week, month, allTime },
@@ -123,6 +127,11 @@ export async function getAdminStats(): Promise<AdminStats> {
     past,
     pendingSubmissions,
     perCategory: CATEGORIES.map((c) => ({ category: c, count: counts.get(c) ?? 0 })),
+    // Only chains actually in use — 14 rows of mostly zeroes is noise.
+    perChain: CHAINS.filter((c) => chainCounts.has(c)).map((c) => ({
+      chain: c,
+      count: chainCounts.get(c) ?? 0,
+    })),
     totalClicks: clickAgg._sum.clickCount ?? 0,
     loves,
   }
