@@ -290,6 +290,16 @@ button {
 
 .page-head {
   padding: 40px 0 22px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.page-head__text {
+  min-width: 0;
+  flex: 1 1 320px;
 }
 
 .page-title {
@@ -1444,14 +1454,11 @@ select.field {
 
 /* ----------------------------------------------------------- visitor stats -- */
 
-.topbar__brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
 .vstats {
+  /* Sits to the right of the page title; nudged down to sit optically level
+     with the heading's cap height rather than its box top. */
+  margin-top: 9px;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -1494,13 +1501,9 @@ select.field {
   height: 5px;
 }
 
-@media (max-width: 520px) {
-  /* The word "visitors" is the first thing to go on a narrow header. */
-  .vstats__item:last-of-type .vstats__label {
-    display: none;
-  }
+@media (max-width: 640px) {
+  /* Wraps under the heading rather than squeezing beside it. */
   .vstats {
-    padding: 3px 7px;
-    gap: 5px;
+    margin-top: 2px;
   }
 }

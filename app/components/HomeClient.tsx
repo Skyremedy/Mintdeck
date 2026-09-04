@@ -20,8 +20,16 @@ import {
 import CollectionTile from "./CollectionTile"
 import LoveProvider from "./LoveProvider"
 import SubmissionBox from "./SubmissionBox"
+import VisitorStats from "./VisitorStats"
+import type { PublicVisitorStats } from "../../lib/queries"
 
-export default function HomeClient({ collections }: { collections: CollectionView[] }) {
+export default function HomeClient({
+  collections,
+  stats,
+}: {
+  collections: CollectionView[]
+  stats: PublicVisitorStats
+}) {
   const [tab, setTab] = useState<string>(DEFAULT_TAB)
   const [sort, setSort] = useState<SortKey>(DEFAULT_SORT)
 
@@ -51,11 +59,14 @@ export default function HomeClient({ collections }: { collections: CollectionVie
   return (
     <>
       <div className="page-head">
-        <h1 className="page-title">Upcoming Arc mints</h1>
-        <p className="page-sub">
-          Every confirmed and TBA drop on Arc, newest listing first. Mints move to the archive the
-          moment their window closes.
-        </p>
+        <div className="page-head__text">
+          <h1 className="page-title">Upcoming Arc mints</h1>
+          <p className="page-sub">
+            Every confirmed and TBA drop on Arc, newest listing first. Mints move to the archive
+            the moment their window closes.
+          </p>
+        </div>
+        <VisitorStats initial={stats} />
       </div>
 
       <div className="tabs" role="tablist" aria-label="Categories">

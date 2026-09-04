@@ -14,9 +14,9 @@ export default async function Home() {
   return (
     <>
       <VisitorPing />
-      <SiteHeader stats={stats} />
+      <SiteHeader />
       <main className="shell">
-        <HomeClient collections={collections} />
+        <HomeClient collections={collections} stats={stats} />
       </main>
       <SiteFooter />
     </>

@@ -5,6 +5,7 @@ import Logo from "../components/Logo"
 import SiteHeader from "../components/SiteHeader"
 import SiteFooter from "../components/SiteFooter"
 import VisitorPing from "../components/VisitorPing"
+import VisitorStats from "../components/VisitorStats"
 
 export const dynamic = "force-dynamic"
 
@@ -18,14 +19,17 @@ export default async function PastMints() {
   return (
     <>
       <VisitorPing />
-      <SiteHeader stats={stats} />
+      <SiteHeader />
       <main className="shell">
         <div className="page-head">
-          <h1 className="page-title">Past mints</h1>
-          <p className="page-sub">
-            Arc collections whose mint window has closed. Entries land here automatically — nothing
-            is archived by hand.
-          </p>
+          <div className="page-head__text">
+            <h1 className="page-title">Past mints</h1>
+            <p className="page-sub">
+              Arc collections whose mint window has closed. Entries land here automatically —
+              nothing is archived by hand.
+            </p>
+          </div>
+          <VisitorStats initial={stats} />
         </div>
 
         <div className="panel">
